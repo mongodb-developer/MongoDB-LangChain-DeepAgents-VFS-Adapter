@@ -20,6 +20,10 @@ Background:
     S3 ──(change event)──► S3Watcher ──► Chunker ──► Embedder ──► MongoDB
 ```
 
+
+
+> ⚠️ **Under active development.** This package is **not yet published on PyPI**. The `pip install` command below will not work until the first release. To try it now, install from source — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+
 ## Install
 
 ```bash
