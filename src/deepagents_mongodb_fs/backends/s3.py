@@ -9,6 +9,7 @@ from botocore.exceptions import ClientError
 
 from deepagents_mongodb_fs.backends.base import ObjectStoreBackend
 from deepagents_mongodb_fs.errors import AdapterError, ErrorCode
+from pprint import pprint
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,7 @@ class S3Backend(ObjectStoreBackend):
         try:
             self._client.head_bucket(Bucket=self._bucket)
         except ClientError as exc:
+            pprint(exc)
             code = exc.response["Error"]["Code"]
             if code in ("404", "NoSuchBucket"):
                 raise AdapterError(ErrorCode.E1002_INVALID_BUCKET, f"Bucket '{self._bucket}' not found") from exc

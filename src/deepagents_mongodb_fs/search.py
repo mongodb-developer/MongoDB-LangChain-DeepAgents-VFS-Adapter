@@ -9,7 +9,7 @@ from __future__ import annotations
 import fnmatch
 import logging
 import re
-from pathlib import PurePosixPath
+# from pathlib import PurePosixPath
 from typing import Any
 
 from langchain_mongodb.pipelines import text_search_stage, vector_search_stage
@@ -157,16 +157,18 @@ class SearchRouter:
                     "index": "fulltext_search_content_filename",
                     "wildcard": {
                         "query": pattern,
-                        "path": "filename",
-                        # allowAnalyzedField required: filename uses lucene.keyword analyzer
-                        # (single-token), so wildcard matches against the whole field value
+                        "path": "source_path",
+                        # allowAnalyzedField required: source_path uses lucene.keyword analyzer
+                        # (single-token), so wildcard matches against the full path string
                         "allowAnalyzedField": True,
                     },
                 }
             },
+            # Apply path prefix filter post-$search ($search wildcard doesn't support pre-filter)
             *(
                 [{"$match": {"source_path": {"$regex": f"^{re.escape(path)}"}}}]
-                if path else []
+                if path
+                else []
             ),
             {"$group": {"_id": "$source_path"}},
             {"$sort": {"_id": 1}},
@@ -187,7 +189,7 @@ class SearchRouter:
             sp = doc["source_path"]
             if sp in seen:
                 continue
-            if fnmatch.fnmatch(doc.get("filename", ""), pattern):
+            if fnmatch.fnmatch(sp, pattern):
                 seen.add(sp)
                 results.append(sp)
                 if len(results) >= self._glob_limit:

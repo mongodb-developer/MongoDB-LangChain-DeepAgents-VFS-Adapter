@@ -1,0 +1,863 @@
+........................................................................ [ 55%]
+........................................EEEEEEEEEEEEEEEEE                [100%]
+==================================== ERRORS ====================================
+___ ERROR at setup of TestMongoFilesystemBackendE2E.test_read_existing_file ____
+
+fixturedef = <FixtureDef argname='_mongo_command_log' scope='session' baseid='tests/e2e'>
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+                        ^^^^^
+
+.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/e2e/conftest.py:186: in _mongo_command_log
+    monitoring.register(listener)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+_ ERROR at setup of TestMongoFilesystemBackendE2E.test_read_missing_file_returns_error _
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+_ ERROR at setup of TestMongoFilesystemBackendE2E.test_write_and_read_roundtrip _
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+________ ERROR at setup of TestMongoFilesystemBackendE2E.test_edit_file ________
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+____ ERROR at setup of TestMongoFilesystemBackendE2E.test_ls_returns_result ____
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+____ ERROR at setup of TestMongoFilesystemBackendE2E.test_glob_pdf_pattern _____
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+__ ERROR at setup of TestMongoFilesystemBackendE2E.test_grep_returns_matches ___
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+____ ERROR at setup of TestMongoFilesystemBackendE2E.test_grep_match_shape _____
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+___ ERROR at setup of TestMongoFilesystemBackendE2E.test_upload_and_download ___
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+_ ERROR at setup of TestMongoFilesystemBackendE2E.test_constructor_validates_missing_bucket _
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+_ ERROR at setup of TestMongoFilesystemBackendE2E.test_constructor_validates_missing_mongo_uri _
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+_ ERROR at setup of TestMongoFilesystemBackendE2E.test_constructor_validates_sqs_without_queue_url _
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+_ ERROR at setup of TestMongoFilesystemBackendE2E.test_error_surfaced_without_stack_trace _
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+________ ERROR at setup of TestPollingWatcherE2E.test_detects_new_file _________
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+______ ERROR at setup of TestPollingWatcherE2E.test_detects_updated_file _______
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+______ ERROR at setup of TestPollingWatcherE2E.test_detects_deleted_file _______
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+________ ERROR at setup of TestPollingWatcherE2E.test_prefix_isolation _________
+
+request = <SubRequest '_mongo_command_log' for <Function test_read_existing_file>>
+
+    @pytest.fixture(scope="session", autouse=True)
+    def _mongo_command_log(request):
+        """Auto-register a pymongo CommandListener for the whole real_e2e session.
+    
+        Activated whenever any test under tests/e2e/ runs.  Writes to
+        ``MONGO_LOG_FILE`` (default: ``./mongo-e2e-<run>.log``) and stderr.
+        Set ``MONGO_LOG=0`` to disable.
+        """
+        if os.getenv("MONGO_LOG", "1") == "0":
+            yield
+            return
+    
+        import pymongo.monitoring as monitoring
+    
+        log_path = Path(os.getenv(
+            "MONGO_LOG_FILE",
+            f"mongo-e2e-{datetime.utcnow().strftime('%Y%m%dT%H%M%S')}.log",
+        )).resolve()
+        sink = log_path.open("w", encoding="utf-8")
+        listener = _MongoCommandLogger(sink)
+>       monitoring.register(listener)
+
+tests/e2e/conftest.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+listener = <e2e.conftest._MongoCommandLogger object at 0x116db9150>
+
+    def register(listener: _EventListener) -> None:
+        """Register a global event listener.
+    
+        :param listener: A subclasses of :class:`CommandListener`,
+            :class:`ServerHeartbeatListener`, :class:`ServerListener`,
+            :class:`TopologyListener`, or :class:`ConnectionPoolListener`.
+        """
+        if not isinstance(listener, _EventListener):
+>           raise TypeError(
+                f"Listeners for {listener} must be either a "
+                "CommandListener, ServerHeartbeatListener, "
+                "ServerListener, TopologyListener, or "
+                "ConnectionPoolListener."
+            )
+E           TypeError: Listeners for <e2e.conftest._MongoCommandLogger object at 0x116db9150> must be either a CommandListener, ServerHeartbeatListener, ServerListener, TopologyListener, or ConnectionPoolListener.
+
+.venv/lib/python3.11/site-packages/pymongo/monitoring.py:492: TypeError
+=============================== warnings summary ===============================
+tests/unit/test_search_router.py::TestSearchRouterLs::test_ls_empty_path
+tests/unit/test_search_router.py::TestSearchRouterLs::test_ls_specific_directory
+tests/integration/test_search_integration.py::TestSearchRouterIntegration::test_ls_root
+tests/integration/test_search_integration.py::TestSearchRouterIntegration::test_ls_docs_directory
+  /Users/anuj.panchal/Documents/Work/AWS/LangChain Atlas Backed VFS with S3/code/.venv/lib/python3.11/site-packages/mongomock/aggregate.py:506: UserWarning: Negative length given to $substr is accepted only until MongoDB 3.7. This behavior will change in the future.
+    warnings.warn('Negative length given to $substr is accepted only until '
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+______________ coverage: platform darwin, python 3.11.13-final-0 _______________
+
+Name                                             Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------------
+src/deepagents_mongodb_fs/__init__.py                4      0   100%
+src/deepagents_mongodb_fs/backend.py               102     60    41%   87-135, 142-162, 166, 184-185, 198-199, 211-212, 230-231, 244-245, 262-263, 275-276, 288-289, 297, 300, 303
+src/deepagents_mongodb_fs/backends/__init__.py       3      0   100%
+src/deepagents_mongodb_fs/backends/base.py          20      0   100%
+src/deepagents_mongodb_fs/backends/s3.py           104     22    79%   53, 75, 81-82, 94, 111-115, 124-126, 128, 140-142, 144, 156-157, 164-165
+src/deepagents_mongodb_fs/chunker.py               234     45    81%   94-95, 127, 147-150, 155-156, 167-168, 173-175, 180-181, 187-188, 197-203, 209-210, 221, 234-235, 241-242, 260-261, 300-301, 309-321, 351
+src/deepagents_mongodb_fs/dtypes.py                 91      0   100%
+src/deepagents_mongodb_fs/embedder.py               67     20    70%   68-74, 78-104, 168
+src/deepagents_mongodb_fs/errors.py                 78      4    95%   140-150
+src/deepagents_mongodb_fs/index_manager.py          92     15    84%   119-123, 142-143, 168-169, 185-192, 208-209
+src/deepagents_mongodb_fs/search.py                130     44    66%   106-107, 113, 146, 148-151, 154-177, 189, 194, 220, 222-225, 229-312, 353-358
+src/deepagents_mongodb_fs/sync.py                   85     11    87%   98, 118-123, 172-173, 187-188
+src/deepagents_mongodb_fs/watcher/__init__.py        4      0   100%
+src/deepagents_mongodb_fs/watcher/base.py           55      9    84%   79-80, 89-91, 99, 101-103
+src/deepagents_mongodb_fs/watcher/polling.py        59      5    92%   63, 91, 96-98
+src/deepagents_mongodb_fs/watcher/sqs.py            83     26    69%   80-87, 90-93, 96-97, 100, 107-111, 121-123, 130-131, 150-152
+------------------------------------------------------------------------------
+TOTAL                                             1211    261    78%
+Coverage XML written to file /Users/anuj.panchal/Documents/Work/AWS/LangChain Atlas Backed VFS with S3/code/demo/artifacts/coverage.xml
+=========================== short test summary info ============================
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_read_existing_file
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_read_missing_file_returns_error
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_write_and_read_roundtrip
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_edit_file - ...
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_ls_returns_result
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_glob_pdf_pattern
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_grep_returns_matches
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_grep_match_shape
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_upload_and_download
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_constructor_validates_missing_bucket
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_constructor_validates_missing_mongo_uri
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_constructor_validates_sqs_without_queue_url
+ERROR tests/e2e/test_e2e.py::TestMongoFilesystemBackendE2E::test_error_surfaced_without_stack_trace
+ERROR tests/e2e/test_watcher_e2e.py::TestPollingWatcherE2E::test_detects_new_file
+ERROR tests/e2e/test_watcher_e2e.py::TestPollingWatcherE2E::test_detects_updated_file
+ERROR tests/e2e/test_watcher_e2e.py::TestPollingWatcherE2E::test_detects_deleted_file
+ERROR tests/e2e/test_watcher_e2e.py::TestPollingWatcherE2E::test_prefix_isolation
+112 passed, 4 warnings, 17 errors in 17.62s

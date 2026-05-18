@@ -139,21 +139,24 @@ class InitialSync:
     # ------------------------------------------------------------------
 
     def _filter_changed(self, keys_etags: list[tuple[str, str]]) -> list[tuple[str, str]]:
-        """Return only (key, etag) pairs that differ from stored ETags."""
-        # Fetch all stored ETags in one query to avoid N+1
+        """Return only (key, etag) pairs that differ from stored ETags.
+
+        Uses $group so we transfer one document per *file* rather than one per
+        *chunk* — O(files) instead of O(chunks) data transferred from MongoDB.
+        """
         all_keys = [k for k, _ in keys_etags]
         stored: dict[str, str] = {}
-        for doc in self._col.find(
-            {"source_path": {"$in": all_keys}},
-            {"source_path": 1, "etag": 1, "_id": 0},
-        ):
-            stored[doc["source_path"]] = doc["etag"]
+        for doc in self._col.aggregate([
+            {"$match": {"source_path": {"$in": all_keys}}},
+            {"$group": {"_id": "$source_path", "etag": {"$first": "$etag"}}},
+        ]):
+            stored[doc["_id"]] = doc["etag"]
 
-        changed = []
-        for key, etag in keys_etags:
-            if stored.get(key) != etag:
-                changed.append((key, etag))
-        return changed
+        return [
+            (key, etag)
+            for key, etag in keys_etags
+            if stored.get(key) != etag
+        ]
 
     def _download_all(
         self, to_process: list[tuple[str, str]]

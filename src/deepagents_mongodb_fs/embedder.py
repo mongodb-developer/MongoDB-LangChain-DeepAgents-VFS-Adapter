@@ -34,7 +34,7 @@ from deepagents_mongodb_fs.errors import AdapterError, ErrorCode
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_PROVIDER = "openai"
+_DEFAULT_PROVIDER = "bedrock"
 _DEFAULT_MODEL = "text-embedding-3-small"
 _BEDROCK_DEFAULT_MODEL = "amazon.titan-embed-text-v2:0"
 _DEFAULT_DIMENSIONS = 1024

@@ -3,6 +3,7 @@ CLAUDE.md
 .claude/
 .env.e2e
 .github/
+.DS_Store
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,venv

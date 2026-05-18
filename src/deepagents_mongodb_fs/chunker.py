@@ -1,12 +1,21 @@
 """Document chunker: bytes → list[Chunk].
 
-Supports .txt, .pdf (.docx detection via python-docx. Format is detected by
+Supports plain text (.txt/.md/.rst/.csv), PDF (.pdf), Word (.docx),
+Excel (.xlsx, .xls), and PowerPoint (.pptx, .ppt). Format is detected by
 file extension first, then magic bytes as a fallback.
 
-Chunking strategy:
-  - Token-aware recursive character splitting (tiktoken cl100k_base).
-  - 512 tokens per chunk, 64-token overlap — enough context for coherent
-    embeddings without wasteful redundancy at scale.
+Chunking strategy (uniform across all formats):
+  - Each format extractor returns a list of (page_number, text) tuples,
+    where one "page" corresponds to a natural logical unit:
+      * PDF        → one page per PDF page
+      * DOCX       → single logical page (whole document)
+      * XLSX / XLS → one page per worksheet
+      * PPTX / PPT → one page per slide
+      * Text/MD/…  → single logical page
+  - Each page's text is then split independently with a token-aware
+    recursive splitter (tiktoken cl100k_base), 512 tokens / 64-token
+    overlap — preserving the same per-page chunking behaviour for every
+    supported format so embeddings stay coherent and comparable.
   - Each chunk carries source_path, chunk_index, page_number, char_start,
     char_end, line_start, content so SearchRouter can return DeepAgents-
     compatible GrepMatch.line directly from stored metadata.
@@ -15,7 +24,7 @@ from __future__ import annotations
 
 import io
 import logging
-import re
+import zipfile
 from pathlib import PurePosixPath
 from typing import Sequence
 
@@ -30,7 +39,16 @@ _ENCODING = "cl100k_base"
 _DEFAULT_TOKEN_LIMIT = 512
 _DEFAULT_OVERLAP = 64
 
-_SUPPORTED_EXTENSIONS = {".txt", ".pdf", ".docx", ".md", ".rst", ".csv"}
+_SUPPORTED_EXTENSIONS = {
+    ".txt", ".md", ".rst", ".csv",
+    ".pdf",
+    ".docx",
+    ".xlsx", ".xls",
+    ".pptx", ".ppt",
+}
+
+# Magic byte signature for OLE2 Compound File Binary (legacy .xls / .ppt / .doc)
+_OLE_MAGIC = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"
 
 
 class Chunker:
@@ -107,15 +125,54 @@ class Chunker:
             return self._extract_pdf(data)
         if ext == ".docx":
             return self._extract_docx(data)
-        # magic-byte fallback: PDF starts with %PDF
+        if ext == ".xlsx":
+            return self._extract_xlsx(data)
+        if ext == ".xls":
+            return self._extract_xls(data)
+        if ext == ".pptx":
+            return self._extract_pptx(data)
+        if ext == ".ppt":
+            return self._extract_ppt(data)
+
+        # ---- magic-byte fallback ----
         if data[:4] == b"%PDF":
             return self._extract_pdf(data)
-        # DOCX is a ZIP archive
         if data[:2] == b"PK":
+            # ZIP archive: could be docx / xlsx / pptx — peek inside
+            kind = self._sniff_ooxml(data)
+            if kind == "xlsx":
+                return self._extract_xlsx(data)
+            if kind == "pptx":
+                return self._extract_pptx(data)
+            if kind == "docx":
+                return self._extract_docx(data)
+            logger.warning("Unrecognized ZIP archive '%s', attempting docx extraction.", ext)
             return self._extract_docx(data)
+        if data[:8] == _OLE_MAGIC:
+            # Legacy OLE2: try xls, then ppt
+            try:
+                return self._extract_xls(data)
+            except AdapterError:
+                return self._extract_ppt(data)
         # Try plain text as last resort; warn
         logger.warning("Unrecognized extension '%s', treating as plain text.", ext)
         return self._extract_text(data)
+
+    @staticmethod
+    def _sniff_ooxml(data: bytes) -> str | None:
+        """Inspect a ZIP archive to identify which OOXML variant it is."""
+        try:
+            with zipfile.ZipFile(io.BytesIO(data)) as zf:
+                names = zf.namelist()
+        except zipfile.BadZipFile:
+            return None
+        if any(n.startswith("xl/") for n in names):
+            return "xlsx"
+        if any(n.startswith("ppt/") for n in names):
+            return "pptx"
+        if any(n.startswith("word/") for n in names):
+            return "docx"
+        return None
 
     def _extract_text(self, data: bytes) -> list[tuple[int, str]]:
         try:
@@ -129,10 +186,23 @@ class Chunker:
             from pypdf import PdfReader
         except ImportError as exc:
             raise AdapterError(ErrorCode.E9003_FORMAT_UNSUPPORTED, "pypdf is not installed") from exc
-        reader = PdfReader(io.BytesIO(data))
+
+        # strict=False: tolerate malformed float tokens (common in reportlab/graphics-heavy PDFs)
+        reader = PdfReader(io.BytesIO(data), strict=False)
         pages: list[tuple[int, str]] = []
         for i, page in enumerate(reader.pages):
-            text = page.extract_text() or ""
+            text = ""
+            try:
+                # layout mode preserves column order and table structure
+                text = page.extract_text(extraction_mode="layout") or ""
+            except Exception:
+                pass
+            if not text.strip():
+                try:
+                    # plain extraction as fallback for pages where layout mode yields nothing
+                    text = page.extract_text() or ""
+                except Exception:
+                    text = ""
             pages.append((i, text))
         return pages
 
@@ -144,6 +214,155 @@ class Chunker:
         doc = docx.Document(io.BytesIO(data))
         full_text = "\n".join(p.text for p in doc.paragraphs)
         return [(0, full_text)]
+
+    def _extract_xlsx(self, data: bytes) -> list[tuple[int, str]]:
+        """One (page_number, text) per worksheet. Rows rendered as TSV lines."""
+        try:
+            from openpyxl import load_workbook
+        except ImportError as exc:
+            raise AdapterError(
+                ErrorCode.E9003_FORMAT_UNSUPPORTED,
+                "openpyxl is not installed; pip install openpyxl",
+            ) from exc
+        wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+        pages: list[tuple[int, str]] = []
+        try:
+            for page_number, sheet in enumerate(wb.worksheets):
+                lines: list[str] = [f"# Sheet: {sheet.title}"]
+                for row in sheet.iter_rows(values_only=True):
+                    if row is None:
+                        continue
+                    cells = ["" if v is None else str(v) for v in row]
+                    if any(c.strip() for c in cells):
+                        lines.append("\t".join(cells))
+                pages.append((page_number, "\n".join(lines)))
+        finally:
+            wb.close()
+        return pages or [(0, "")]
+
+    def _extract_xls(self, data: bytes) -> list[tuple[int, str]]:
+        """Legacy .xls (BIFF) via xlrd. xlrd>=2.0 supports .xls only."""
+        try:
+            import xlrd
+        except ImportError as exc:
+            raise AdapterError(
+                ErrorCode.E9003_FORMAT_UNSUPPORTED,
+                "xlrd is not installed; pip install 'xlrd>=2.0.1'",
+            ) from exc
+        try:
+            book = xlrd.open_workbook(file_contents=data)
+        except Exception as exc:
+            raise AdapterError(ErrorCode.E9002_CHUNKER_FAILED, f"xlrd failed: {exc}") from exc
+        pages: list[tuple[int, str]] = []
+        for page_number, sheet in enumerate(book.sheets()):
+            lines: list[str] = [f"# Sheet: {sheet.name}"]
+            for row_idx in range(sheet.nrows):
+                cells = [
+                    "" if v is None else str(v)
+                    for v in sheet.row_values(row_idx)
+                ]
+                if any(c.strip() for c in cells):
+                    lines.append("\t".join(cells))
+            pages.append((page_number, "\n".join(lines)))
+        return pages or [(0, "")]
+
+    def _extract_pptx(self, data: bytes) -> list[tuple[int, str]]:
+        """One (page_number, text) per slide. Pulls text from shapes + notes."""
+        try:
+            from pptx import Presentation
+        except ImportError as exc:
+            raise AdapterError(
+                ErrorCode.E9003_FORMAT_UNSUPPORTED,
+                "python-pptx is not installed; pip install python-pptx",
+            ) from exc
+        prs = Presentation(io.BytesIO(data))
+        pages: list[tuple[int, str]] = []
+        for page_number, slide in enumerate(prs.slides):
+            parts: list[str] = []
+            for shape in slide.shapes:
+                # Text-bearing shapes
+                if getattr(shape, "has_text_frame", False) and shape.has_text_frame:
+                    for para in shape.text_frame.paragraphs:
+                        text = "".join(run.text for run in para.runs).strip()
+                        if text:
+                            parts.append(text)
+                # Tables
+                if getattr(shape, "has_table", False) and shape.has_table:
+                    for row in shape.table.rows:
+                        cells = [cell.text.strip() for cell in row.cells]
+                        if any(cells):
+                            parts.append("\t".join(cells))
+            # Speaker notes
+            if slide.has_notes_slide:
+                notes_tf = slide.notes_slide.notes_text_frame
+                notes = (notes_tf.text or "").strip() if notes_tf is not None else ""
+                if notes:
+                    parts.append(f"[notes] {notes}")
+            pages.append((page_number, "\n".join(parts)))
+        return pages or [(0, "")]
+
+    def _extract_ppt(self, data: bytes) -> list[tuple[int, str]]:
+        """Legacy binary .ppt via olefile (best-effort text extraction).
+
+        The binary PPT format has no clean pure-Python parser; we scan the
+        ``PowerPoint Document`` OLE stream for embedded UTF-16LE / ASCII
+        strings. Adequate for indexing, not for fidelity rendering.
+        """
+        try:
+            import olefile
+        except ImportError as exc:
+            raise AdapterError(
+                ErrorCode.E9003_FORMAT_UNSUPPORTED,
+                "olefile is not installed; pip install olefile (required for legacy .ppt)",
+            ) from exc
+        try:
+            ole = olefile.OleFileIO(io.BytesIO(data))
+        except Exception as exc:
+            raise AdapterError(ErrorCode.E9002_CHUNKER_FAILED, f"olefile failed: {exc}") from exc
+        try:
+            stream_name = "PowerPoint Document"
+            if not ole.exists(stream_name):
+                raise AdapterError(
+                    ErrorCode.E9002_CHUNKER_FAILED,
+                    f"Stream '{stream_name}' missing — not a valid .ppt file",
+                )
+            raw = ole.openstream(stream_name).read()
+        finally:
+            ole.close()
+
+        text = self._scan_ole_strings(raw)
+        return [(0, text)]
+
+    @staticmethod
+    def _scan_ole_strings(blob: bytes, min_len: int = 4) -> str:
+        """Best-effort string extraction from a binary OLE stream."""
+        out: list[str] = []
+        # UTF-16LE runs: pairs of (printable ascii, 0x00)
+        i = 0
+        n = len(blob)
+        while i < n - 1:
+            run: list[int] = []
+            j = i
+            while j < n - 1 and 0x20 <= blob[j] <= 0x7E and blob[j + 1] == 0x00:
+                run.append(blob[j])
+                j += 2
+            if len(run) >= min_len:
+                out.append(bytes(run).decode("ascii", errors="replace"))
+                i = j
+            else:
+                i += 1
+        # ASCII runs
+        ascii_run: list[int] = []
+        for b in blob:
+            if 0x20 <= b <= 0x7E or b in (0x09, 0x0A, 0x0D):
+                ascii_run.append(b)
+            else:
+                if len(ascii_run) >= min_len:
+                    out.append(bytes(ascii_run).decode("ascii", errors="replace"))
+                ascii_run = []
+        if len(ascii_run) >= min_len:
+            out.append(bytes(ascii_run).decode("ascii", errors="replace"))
+        return "\n".join(out)
 
     # ------------------------------------------------------------------
     # Token-aware recursive splitter

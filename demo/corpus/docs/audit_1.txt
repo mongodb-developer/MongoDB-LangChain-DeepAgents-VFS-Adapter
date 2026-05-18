@@ -1,0 +1,1 @@
+Incident report ACME-AUTH-7421: rotation key was leaked via a misconfigured logging sink. No customer credentials were exposed.

@@ -149,9 +149,10 @@ class IndexManager:
                 "dynamic": False,
                 "fields": {
                     "content": {"type": "string", "analyzer": "lucene.standard"},
-                    # lucene.keyword: whole field value is a single token; wildcard queries
-                    # with allowAnalyzedField=true then match against the full filename string
+                    # lucene.keyword: whole field is a single token; wildcard queries with
+                    # allowAnalyzedField=true match against the full string value
                     "filename": {"type": "string", "analyzer": "lucene.keyword"},
+                    "source_path": {"type": "string", "analyzer": "lucene.keyword"},
                 },
             }
         }
@@ -169,17 +170,18 @@ class IndexManager:
                 raise AdapterError(ErrorCode.E1004_INDEX_PROVISION_FAILED, str(exc)) from exc
             return
 
-        # Migrate: update if filename field is not lucene.keyword (e.g. still autocomplete)
-        current_filename = (
+        # Migrate: update if filename is not lucene.keyword or source_path is missing
+        current_fields = (
             existing[index_name]
             .get("latestDefinition", {})
             .get("mappings", {})
             .get("fields", {})
-            .get("filename", {})
         )
+        current_filename = current_fields.get("filename", {})
         correct = (
             current_filename.get("type") == "string"
             and current_filename.get("analyzer") == "lucene.keyword"
+            and "source_path" in current_fields
         )
         if not correct:
             try:

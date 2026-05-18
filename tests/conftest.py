@@ -120,6 +120,89 @@ def sample_text_bytes() -> bytes:
     """).encode("utf-8")
 
 
+@pytest.fixture(scope="session")
+def sample_xlsx_bytes() -> bytes:
+    """Two-sheet xlsx workbook with mixed string/number content."""
+    openpyxl = pytest.importorskip("openpyxl")
+    wb = openpyxl.Workbook()
+    ws1 = wb.active
+    ws1.title = "Revenue"
+    ws1.append(["Region", "Q1", "Q2", "Q3", "Q4"])
+    ws1.append(["EMEA", 100, 120, 130, 145])
+    ws1.append(["APAC", 80, 95, 110, 130])
+    ws1.append(["AMER", 200, 210, 225, 240])
+    ws2 = wb.create_sheet("Notes")
+    ws2.append(["Author", "Comment"])
+    ws2.append(["alice", "Vector search outperforms keyword on paraphrased queries."])
+    ws2.append(["bob", "Atlas $rankFusion combines BM25 and cosine via RRF."])
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+@pytest.fixture(scope="session")
+def sample_xls_bytes() -> bytes:
+    """Two-sheet legacy .xls workbook (BIFF8) via xlwt."""
+    xlwt = pytest.importorskip("xlwt")
+    wb = xlwt.Workbook()
+    s1 = wb.add_sheet("Revenue")
+    headers = ["Region", "Q1", "Q2", "Q3", "Q4"]
+    rows = [
+        ["EMEA", 100, 120, 130, 145],
+        ["APAC", 80, 95, 110, 130],
+        ["AMER", 200, 210, 225, 240],
+    ]
+    for col, h in enumerate(headers):
+        s1.write(0, col, h)
+    for r, row in enumerate(rows, start=1):
+        for c, v in enumerate(row):
+            s1.write(r, c, v)
+    s2 = wb.add_sheet("Notes")
+    s2.write(0, 0, "Author")
+    s2.write(0, 1, "Comment")
+    s2.write(1, 0, "alice")
+    s2.write(1, 1, "Vector search outperforms keyword on paraphrased queries.")
+    s2.write(2, 0, "bob")
+    s2.write(2, 1, "Atlas rankFusion combines BM25 and cosine via RRF.")
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
+@pytest.fixture(scope="session")
+def sample_pptx_bytes() -> bytes:
+    """Two-slide pptx with title + body text, a table, and speaker notes."""
+    pptx_mod = pytest.importorskip("pptx")
+    Presentation = pptx_mod.Presentation
+    from pptx.util import Inches
+
+    prs = Presentation()
+    # Slide 1: title + content layout
+    slide1 = prs.slides.add_slide(prs.slide_layouts[1])
+    slide1.shapes.title.text = "Hybrid Retrieval Overview"
+    body = slide1.placeholders[1].text_frame
+    body.text = "BM25 captures lexical matches"
+    body.add_paragraph().text = "Vector search captures semantic similarity"
+    body.add_paragraph().text = "RRF fuses the two ranked lists"
+    slide1.notes_slide.notes_text_frame.text = "Mention $rankFusion server-side pipeline."
+
+    # Slide 2: title + a 2x2 table
+    slide2 = prs.slides.add_slide(prs.slide_layouts[5])
+    slide2.shapes.title.text = "Benchmark Snapshot"
+    tbl_shape = slide2.shapes.add_table(
+        rows=2, cols=2, left=Inches(1), top=Inches(2), width=Inches(6), height=Inches(2)
+    )
+    table = tbl_shape.table
+    table.cell(0, 0).text = "Method"
+    table.cell(0, 1).text = "nDCG@10"
+    table.cell(1, 0).text = "Hybrid (RRF)"
+    table.cell(1, 1).text = "0.71"
+
+    buf = io.BytesIO()
+    prs.save(buf)
+    return buf.getvalue()
+
+
 @pytest.fixture
 def sample_pdf_bytes() -> bytes:
     """Create a minimal valid PDF in-memory using pypdf if available."""
