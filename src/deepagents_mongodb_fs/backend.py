@@ -22,6 +22,7 @@ from typing import Any, Literal
 
 import pymongo
 from pymongo.collection import Collection
+from pymongo.driver_info import DriverInfo
 
 from deepagents_mongodb_fs.backends.s3 import S3Backend
 from deepagents_mongodb_fs.chunker import Chunker
@@ -47,6 +48,14 @@ from deepagents_mongodb_fs.sync import InitialSync
 from deepagents_mongodb_fs.watcher import PollingWatcher, SQSWatcher, S3Watcher
 
 logger = logging.getLogger(__name__)
+
+try:
+    from importlib.metadata import version as get_version
+    _VERSION = get_version("deepagents_mongodb_fs")
+except Exception:
+    _VERSION = None
+
+_DRIVER_INFO = DriverInfo(name="DeepAgents-MongoDB-FS", version=_VERSION)
 
 _DB_NAME = "deepagents_mongodb_fs"
 _COLLECTION_NAME = "demo_chunks"
@@ -99,7 +108,7 @@ class MongoFilesystemBackend:
         self._embedder = Embedder(model=embedding_model, dimensions=embedding_dimensions)
         self._chunker = Chunker()
 
-        mongo_client = pymongo.MongoClient(mongodb_connection_string)
+        mongo_client = pymongo.MongoClient(mongodb_connection_string, driver=_DRIVER_INFO)
         self._col: Collection = mongo_client[_DB_NAME][_COLLECTION_NAME]  # type: ignore[type-arg]
 
         self._index_manager = IndexManager(self._col, embedding_dimensions=embedding_dimensions)
