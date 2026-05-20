@@ -63,6 +63,12 @@ class S3Watcher(ABC):
 
     def on_created(self, key: str) -> None:
         """Handle a new object in S3."""
+        etag = getattr(self._store, "get_etag", lambda k: "")(key) or ""
+        if etag and self._col.count_documents(
+            {"source_path": key, "etag": etag}, limit=1
+        ):
+            logger.debug("Watcher: skipping already-ingested key '%s' (etag=%s)", key, etag)
+            return
         self._ingest(key)
 
     def on_updated(self, key: str) -> None:

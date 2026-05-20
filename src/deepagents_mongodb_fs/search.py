@@ -277,6 +277,7 @@ class SearchRouter:
                             }
                         },
                         "combination": {"weights": {"fulltext": 0.5, "vector": 0.5}},
+                        "scoreDetails": True,
                     }
                 },
                 {"$limit": self._grep_limit},
@@ -285,6 +286,7 @@ class SearchRouter:
                         "source_path": 1,
                         "line_start": 1,
                         "content": 1,
+                        "score": {"$meta": "searchScore"},
                         "_id": 0,
                     }
                 },

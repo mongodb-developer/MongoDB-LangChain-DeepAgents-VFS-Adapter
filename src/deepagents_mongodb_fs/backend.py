@@ -49,7 +49,7 @@ from deepagents_mongodb_fs.watcher import PollingWatcher, SQSWatcher, S3Watcher
 logger = logging.getLogger(__name__)
 
 _DB_NAME = "deepagents_mongodb_fs"
-_COLLECTION_NAME = "aws_mdb_resuts_chunks"
+_COLLECTION_NAME = "demo_chunks"
 
 WatcherType = Literal["polling", "sqs"]
 

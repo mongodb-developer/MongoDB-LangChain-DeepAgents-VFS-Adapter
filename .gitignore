@@ -4,6 +4,8 @@ CLAUDE.md
 .env.e2e
 .github/
 .DS_Store
+demo/nb-run.html
+
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,venv

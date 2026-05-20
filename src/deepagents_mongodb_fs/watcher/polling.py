@@ -21,7 +21,7 @@ from deepagents_mongodb_fs.watcher.base import S3Watcher
 
 logger = logging.getLogger(__name__)
 
-_DEFAULT_INTERVAL = 300  # 5 minutes
+_DEFAULT_INTERVAL = 10  # 10 seconds
 
 
 class PollingWatcher(S3Watcher):
