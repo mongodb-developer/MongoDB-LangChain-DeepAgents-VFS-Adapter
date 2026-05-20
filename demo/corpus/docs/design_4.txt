@@ -1,1 +1,0 @@
-Background: we used to keep a single long-lived bearer in local storage. We replaced that with a paired short / long credential design so a compromised short credential expires before it can be replayed.
