@@ -8,23 +8,11 @@
 
 ## Architecture
 
-```
-DeepAgent
-    │  grep / glob / ls
-    ▼
-MongoFilesystemBackend
-    ├── SearchRouter ──► MongoDB Atlas  (vector + full-text + hybrid $rankFusion)
-    └── S3Backend    ──► S3 bucket      (read / write / edit / upload / download)
-
-Background (non-blocking constructor):
-    IndexManager ──► Atlas (provision vector + full-text indexes)
-    InitialSync  ──► S3 ──► Chunker ──► Embedder ──► MongoDB
-    S3Watcher    ──► polls S3 (or consumes SQS) to keep MongoDB in sync
-```
-
-> ⚠️ **Under active development.** This package is **not yet published on PyPI**. The `pip install` command below will not work until the first release. To try it now, install from source — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+![High-level architecture](./docs/images/high-level-arch-draw-io.png)
 
 ## Install
+
+> ⚠️ **Under active development.** This package is **not yet published on PyPI**. The `pip install` command below will not work until the first release. To try it now, install from source — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ```bash
 pip install deepagents_mongodb_fs
