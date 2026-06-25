@@ -55,9 +55,11 @@ dev = [
     "pdoc>=14.0.0",
     "pip-audit>=2.7.0",
     "bandit>=1.7.0",
+    "build>=1.2.0",
     "twine>=5.0.0",
     "types-boto3>=1.0.0",
 ]
+
 
 [project.urls]
 Homepage = "https://github.com/mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter"
