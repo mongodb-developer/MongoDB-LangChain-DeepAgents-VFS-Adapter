@@ -60,10 +60,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/anujpanchal57/deepagents_mongodb_fs"
-Documentation = "https://anujpanchal57.github.io/deepagents_mongodb_fs"
-Repository = "https://github.com/anujpanchal57/deepagents_mongodb_fs"
-Issues = "https://github.com/anujpanchal57/deepagents_mongodb_fs/issues"
+Homepage = "https://github.com/mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter"
+Documentation = "https://github.com/mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter/tree/main/docs"
+Repository = "https://github.com/mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter"
+Issues = "https://github.com/mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/deepagents_mongodb_fs"]

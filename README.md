@@ -1,8 +1,14 @@
 # deepagents_mongodb_fs
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![MongoDB Atlas](https://img.shields.io/badge/MongoDB-Atlas-green.svg)](https://www.mongodb.com/atlas)
+[![LangChain](https://img.shields.io/badge/LangChain-DeepAgents-blue.svg)](https://github.com/langchain-ai/deepagents)
 
 **MongoDB Atlas-backed filesystem search adapter for LangChain DeepAgents.**
+
+> Repository: [`mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter`](https://github.com/mongodb-developer/MongoDB-LangChain-DeepAgents-VFS-Adapter)
+
 
 `deepagents_mongodb_fs` implements DeepAgents' `BackendProtocol`, routing `grep`, `glob`, and `ls` through MongoDB Atlas (vector search + full-text search + hybrid `$rankFusion`) while forwarding all other file operations (`read`, `write`, `edit`, `upload_files`, `download_files`) directly to S3.
 
