@@ -12,6 +12,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # Unit tests construct boto3 clients (mocked) but botocore still needs a
+  # region; CI runners have none configured.
+  AWS_DEFAULT_REGION: us-east-1
+
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

@@ -25,16 +25,28 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 @pytest.fixture(scope="function")
 def aws_credentials():
-    """Fake AWS creds so moto doesn't hit real AWS."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    """Fake AWS creds so moto doesn't hit real AWS.
+
+    Saves and restores any pre-existing values on teardown so we don't clobber
+    a region configured by the environment (e.g. ``AWS_DEFAULT_REGION`` set in
+    CI), which other tests' boto3 clients rely on.
+    """
+    keys = {
+        "AWS_ACCESS_KEY_ID": "testing",
+        "AWS_SECRET_ACCESS_KEY": "testing",
+        "AWS_SECURITY_TOKEN": "testing",
+        "AWS_SESSION_TOKEN": "testing",
+        "AWS_DEFAULT_REGION": "us-east-1",
+    }
+    previous = {k: os.environ.get(k) for k in keys}
+    os.environ.update(keys)
     yield
-    for k in ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SECURITY_TOKEN",
-               "AWS_SESSION_TOKEN", "AWS_DEFAULT_REGION"):
-        os.environ.pop(k, None)
+    for k, prior in previous.items():
+        if prior is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = prior
+
 
 
 @pytest.fixture(scope="function")
