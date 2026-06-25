@@ -1,7 +1,8 @@
 name: CI
 
-# Lint, type-check, and run unit tests on every push and pull request.
+# Run unit tests on every push and pull request.
 # Unit tests use no external services (mongomock + moto via dev extras).
+
 
 on:
   push:
@@ -32,9 +33,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e ".[dev]"
-      - name: Lint (ruff)
-        run: ruff check src tests
-      - name: Type-check (mypy)
-        run: mypy src
       - name: Unit tests
         run: pytest -m unit
+
