@@ -1,9 +1,8 @@
-AGENTS.md
 CLAUDE.md
 .claude/
 .env.e2e
-.github/
 .DS_Store
+
 demo/nb-run.html
 
 
