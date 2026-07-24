@@ -60,6 +60,12 @@ _DRIVER_INFO = DriverInfo(name="DeepAgents-MongoDB-FS", version=_VERSION)
 _DB_NAME = "deepagents_mongodb_fs"
 _COLLECTION_NAME = "demo_chunks"
 
+# Cap the bytes read() will pull into memory so a large upload can't be read back
+# to OOM the worker. 64 MiB covers real text files; oversized/unbounded reads are
+# refused after a cheap HEAD.
+# ponytail: raise the constant if legitimately huge reads become a use case.
+_MAX_READ_BYTES = 64 * 1024 * 1024
+
 WatcherType = Literal["polling", "sqs"]
 
 
@@ -236,6 +242,16 @@ class MongoFilesystemBackend:
         Returns:
             ReadResult with the file content as a decoded string.
         """
+        # HEAD first: refuse to pull more than the memory cap into RAM. offset/limit
+        # are byte-based here, so bound the requested span before the GET.
+        size = self._store.get_size(path)
+        available = max(size - max(offset, 0), 0)
+        to_read = available if limit < 0 else min(limit, available)
+        if to_read > _MAX_READ_BYTES:
+            raise AdapterError(
+                ErrorCode.E2002_OBJECT_READ_FAILED,
+                f"Read of {to_read} bytes exceeds limit of {_MAX_READ_BYTES} bytes",
+            )
         data = self._store.read(path, offset, limit)
         return ReadResult(path=path, content=data.decode("utf-8", errors="replace"))
 

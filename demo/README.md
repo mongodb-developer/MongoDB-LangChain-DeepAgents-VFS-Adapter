@@ -1,4 +1,4 @@
-# Demo Package — `deepagents_mongodb_fs`
+# Demo Package — `langchain_mongodb_deepagents_vfs`
 
 Materials for the **product check-in**. Two audiences are showcased:
 
@@ -68,12 +68,13 @@ jupyter lab demo/demo.ipynb
 ## Cleanup
 
 The notebook writes a few files under your S3 `$S3_PREFIX` and several
-documents into the Atlas `deepagents_mongodb_fs.chunks` collection. To reset
+documents into the Atlas `langchain_mongodb_deepagents_vfs.demo_chunks` collection.
+To reset
 between rehearsals:
 
 ```bash
 aws s3 rm "s3://$S3_BUCKET_NAME/$S3_PREFIX" --recursive
 # then in mongosh:
-#   use deepagents_mongodb_fs
-#   db.chunks.deleteMany({})
+#   use langchain_mongodb_deepagents_vfs
+#   db.demo_chunks.deleteMany({})
 ```
