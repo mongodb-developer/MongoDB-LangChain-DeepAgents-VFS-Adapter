@@ -1,3 +1,5 @@
+> ⚠️ **This repository has been archived. Kindly refer this [repository](https://github.com/langchain-ai/langchain-mongodb/tree/main/libs/langchain-mongodb-deepagents-vfs) for detailed instructions on how to use and contribute.**
+
 # deepagents_mongodb_fs
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -11,8 +13,6 @@
 ![High-level architecture](./docs/images/high-level-arch-draw-io.png)
 
 ## Install
-
-> ⚠️ **Under active development.** This package is **not yet published on PyPI**. The `pip install` command below will not work until the first release. To try it now, install from source — see [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ```bash
 pip install deepagents_mongodb_fs
